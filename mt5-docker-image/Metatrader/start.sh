@@ -108,6 +108,12 @@ if ! is_wine_python_package_installed "python-dateutil"; then
     $wine_executable python -m pip install --no-cache-dir python-dateutil
 fi
 
+# Install fastapi and uvicorn if needed
+if ! is_wine_python_package_installed "fastapi"; then
+    show_message "[6/7] Installing fastapi and uvicorn library in Windows"
+    $wine_executable python -m pip install --no-cache-dir fastapi uvicorn
+fi
+
 # Install mt5linux library in Linux if not installed
 show_message "[6/7] Checking and installing mt5linux library in Linux if necessary"
 if ! is_python_package_installed "mt5linux"; then
@@ -134,4 +140,15 @@ if ss -tuln | grep ":$mt5server_port" > /dev/null; then
     show_message "[7/7] The mt5linux server is running on port $mt5server_port."
 else
     show_message "[7/7] Failed to start the mt5linux server on port $mt5server_port."
+fi
+
+# Start the app.py server on wine 
+show_message "[7/7] Starting the app.py server..."
+cd /Metatrader
+$wine_executable python -m uvicorn app:app --host 0.0.0.0 --port 8000 &
+sleep 5
+if ss -tuln | grep ":8000" > /dev/null; then
+    show_message "[7/7] The app.py server is running on port 8000."
+else
+    show_message "[7/7] Failed to start the app.py server on port 8000."
 fi
