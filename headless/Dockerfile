@@ -43,9 +43,9 @@ RUN winecfg
 # Dica: É mais fácil instalar o MT5 numa máquina Windows e copiar a pasta "MetaTrader 5" do Program Files para o container
 RUN mkdir -p /root/.wine/drive_c/mt5
 # Se preferir automatizar o download do instalador oficial:
-# RUN wget https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe -O /tmp/mt5setup.exe
+RUN wget https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe -O /tmp/mt5setup.exe
 
-COPY ./MetaTrader5/. /root/.wine/drive_c/mt5/
+# COPY ./MetaTrader5/. /root/.wine/drive_c/mt5/
 COPY ./config.ini /root/.wine/drive_c/mt5
 
 # 4. Criar o script de inicialização do monitor virtual + MT5
@@ -54,14 +54,14 @@ RUN echo '#!/bin/bash\n\
 Xvfb :1 -screen 0 1024x768x16 &\n\
 export DISPLAY=:1\n\
 \n\
-echo "Atualizando prefixo do Wine e certificados..."\n\
-export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt\n\
-LIBGL_DRI3_DISABLE=1 wineboot --update\n\
+#echo "Atualizando prefixo do Wine e certificados..."\n\
+#export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt\n\
+#LIBGL_DRI3_DISABLE=1 wineboot --update\n\
 \n\
 echo "A iniciar MetaTrader 5..."\n\
 # Executa o MT5 via Wine\n\
 LIBGL_DRI3_DISABLE=1 wine "C:\\mt5\\terminal64.exe" /portable "/config:C:\\mt5\\config.ini" \n\
 ' > /entrypoint.sh && chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
-#ENTRYPOINT ["bash"]
+#ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["bash"]
