@@ -1,0 +1,10 @@
+.devcontainer
+.git
+docker-compose.yaml
+README.md
+LICENSE.md
+.gitignore
+.env.example
+.env
+config
+mt5run
