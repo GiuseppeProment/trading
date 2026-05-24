@@ -31,7 +31,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /etc/apt/keyrings/winehq-archive.key
 
 
-#COPY /config.ini /config.ini    
 COPY /Metatrader /Metatrader
 RUN chmod +x /Metatrader/start.sh
 COPY /root /
