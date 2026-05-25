@@ -1,1 +1,9 @@
-docker run -p 3000:3000 -p 8001:8001 -p 8000:8000 -v config:/config mt5 -t mt5
+docker run \
+ --rm \
+ --name mt5 \
+ -p 3000:3000 \
+ -p 81:81 \
+ -p 77:77 \
+ -p 78:78 \
+ -v ./config:/config \
+ mt5
