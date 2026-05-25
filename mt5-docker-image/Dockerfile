@@ -10,6 +10,7 @@ ENV TITLE=Metatrader5
 ENV WINEPREFIX="/config/.wine"
 ENV WINEDEBUG=-all
 
+#&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /etc/apt/keyrings/winehq-archive.key\
 # Install all packages in a single layer to reduce image size
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -21,19 +22,18 @@ RUN apt-get update \
     gnupg2 \
     software-properties-common \
     ca-certificates \
+    socat \
     && mkdir -pm755 /etc/apt/keyrings \
     && wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key \
     && wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/debian/dists/bookworm/winehq-bookworm.sources \
     && dpkg --add-architecture i386 \
     && apt-get update \
     && apt-get install --install-recommends -y winehq-staging \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /etc/apt/keyrings/winehq-archive.key
-
+    && apt-get clean 
 
 COPY /Metatrader /Metatrader
 RUN chmod +x /Metatrader/start.sh
 COPY /root /
 
-EXPOSE 3000 77 78 81 
+EXPOSE 3000 770 780 810 
 VOLUME /config

@@ -115,6 +115,12 @@ if ! is_python_package_installed "pyxdg"; then
     pip install --break-system-packages --no-cache-dir pyxdg
 fi
 
+show_message "Initializing socats"
+socat TCP-LISTEN:770,fork,reuseaddr TCP:127.0.0.1:77 &
+socat TCP-LISTEN:780,fork,reuseaddr TCP:127.0.0.1:78 &
+# O último comando roda em primeiro plano para manter o container vivo
+socat TCP-LISTEN:810,fork,reuseaddr TCP:127.0.0.1:81 &
+
 # Start the app.py server on wine 
 
 #show_message "[7/7] Starting the app.py server..."

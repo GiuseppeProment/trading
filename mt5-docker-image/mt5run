@@ -1,9 +1,11 @@
 docker run \
+ -p 3000:3000 \
+ -p 81:810 \
+ -p 77:770 \
+ -p 78:780 \
  --rm \
  --name mt5 \
- -p 3000:3000 \
- -p 81:81 \
- -p 77:77 \
- -p 78:78 \
+ --net=bridge \
  -v ./config:/config \
+ -v /etc/localtime:/etc/localtime:ro \
  mt5
