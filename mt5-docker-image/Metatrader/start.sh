@@ -68,11 +68,6 @@ else
     rm -f /config/.wine/drive_c/mt5setup.exe
 fi
 
-# Install MTSocketApi
-show_message "[3/8] Installing MTSocketApi..."
-cp /Metatrader/MTsocketAPI.ex5 /config/.wine/drive_c/Program\ Files/MetaTrader\ 5/MQL5/Experts/Advisors/
-show_message "[3/8] MTSocketApi installed."
-
 # Recheck if MetaTrader 5 is installed
 if [ -e "$mt5file" ]; then
     show_message "[4/8] File $mt5file is installed. Running MT5..."
@@ -80,7 +75,6 @@ if [ -e "$mt5file" ]; then
 else
     show_message "[4/8] File $mt5file is not installed. MT5 cannot be run."
 fi
-
 
 # Install Python in Wine if not present
 if ! $wine_executable python --version 2>/dev/null; then
@@ -96,6 +90,12 @@ fi
 # Upgrade pip and install required packages
 show_message "[6/8] Installing Python libraries"
 $wine_executable python -m pip install --upgrade --no-cache-dir pip
+
+# Downgrade NumPy to version 1.24.3 for compatibility with MetaTrader5 library
+if ! is_wine_python_package_installed "numpy==1.24.3"; then
+    show_message "[6/8] Downgrading NumPy to version 1.24.3 for compatibility with MetaTrader5 library"
+    $wine_executable python -m pip install --no-cache-dir numpy==1.24.3 --force-reinstall   
+fi
 
 # Install MetaTrader5 library in Windows if not installed
 show_message "[7/8] Installing MetaTrader5 library in Windows"
@@ -115,21 +115,16 @@ if ! is_python_package_installed "pyxdg"; then
     pip install --break-system-packages --no-cache-dir pyxdg
 fi
 
-show_message "Initializing socats"
-socat TCP-LISTEN:770,fork,reuseaddr TCP:127.0.0.1:77 &
-socat TCP-LISTEN:780,fork,reuseaddr TCP:127.0.0.1:78 &
-# O último comando roda em primeiro plano para manter o container vivo
-socat TCP-LISTEN:810,fork,reuseaddr TCP:127.0.0.1:81 &
 
 # Start the app.py server on wine 
 
-#show_message "[7/7] Starting the app.py server..."
-#cd /Metatrader
-#$wine_executable python -m uvicorn app:app --host 0.0.0.0 --port 8000 &
-#sleep 5
-#if ss -tuln | grep ":8000" > /dev/null; then
-#    show_message "[7/7] The app.py server is running on port 8000."
-#else
-#    show_message "[7/7] Failed to start the app.py server on port 8000."
-#fi
+show_message "[10] Starting the app.py server..."
+cd /Metatrader
+$wine_executable python -m uvicorn app:app --host 0.0.0.0 --port 8000 &
+sleep 5
+if ss -tuln | grep ":8000" > /dev/null; then
+    show_message "[10] The app.py server is running on port 8000."
+else
+    show_message "[10] Failed to start the app.py server on port 8000."
+fi
 show_message "All setup steps completed. MetaTrader 5 should be running"
