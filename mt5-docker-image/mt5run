@@ -1,9 +1,10 @@
+# --rm \
 docker run \
  -p 3000:3000 \
  -p 8000:8000 \
- --rm \
  --name mt5 \
  --net=bridge \
  -v ./config:/config \
  -v /etc/localtime:/etc/localtime:ro \
+ -v ./metatrader:/metatrader \
  mt5

@@ -7,7 +7,7 @@ WINEDEBUG='-all'
 wine_executable="wine"
 metatrader_version="5.0.37"
 mt5server_port="8001"
-#MT5_CMD_OPTIONS="/config:Z:\\MetaTrader\config.ini"
+#MT5_CMD_OPTIONS="/config:Z:\\metatrader\config.ini"
 mono_url="https://dl.winehq.org/wine/wine-mono/10.3.0/wine-mono-10.3.0-x86.msi"
 python_url="https://www.python.org/ftp/python/3.9.13/python-3.9.13.exe"
 mt5setup_url="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe"
@@ -97,30 +97,24 @@ if ! is_wine_python_package_installed "numpy==1.24.3"; then
     $wine_executable python -m pip install --no-cache-dir numpy==1.24.3 --force-reinstall   
 fi
 
-# Install MetaTrader5 library in Windows if not installed
 show_message "[7/8] Installing MetaTrader5 library in Windows"
 if ! is_wine_python_package_installed "MetaTrader5==$metatrader_version"; then
     $wine_executable python -m pip install --no-cache-dir MetaTrader5==$metatrader_version
 fi
 
-# Install fastapi and uvicorn if needed
+show_message "[8/8] Installing fastapi and uvicorn library in Windows"
 if ! is_wine_python_package_installed "fastapi"; then
-    show_message "[8/8] Installing fastapi and uvicorn library in Windows"
     $wine_executable python -m pip install --no-cache-dir fastapi uvicorn
 fi
 
-# Install pyxdg library in Linux if not installed
 show_message "[9/8] Checking and installing pyxdg library in Linux if necessary"
 if ! is_python_package_installed "pyxdg"; then
     pip install --break-system-packages --no-cache-dir pyxdg
 fi
 
-
-# Start the app.py server on wine 
-
 show_message "[10] Starting the app.py server..."
-cd /Metatrader
-$wine_executable python -m uvicorn app:app --host 0.0.0.0 --port 8000 &
+cd /metatrader
+$wine_executable python -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload &
 sleep 5
 if ss -tuln | grep ":8000" > /dev/null; then
     show_message "[10] The app.py server is running on port 8000."

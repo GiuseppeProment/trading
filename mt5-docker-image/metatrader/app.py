@@ -20,6 +20,20 @@ def get_price(symbol: str):
         raise HTTPException(status_code=404, detail="Ativo não encontrado")
     return {"symbol": symbol, "bid": tick.bid, "ask": tick.ask}
 
+@app.get("/{symbol}")
+def get(symbol: str):
+    symbol_info = mt5.symbol_info(symbol)
+    if not symbol_info:
+        raise HTTPException(status_code=404, detail="Ativo não encontrado ["+mt5.last_error()+"]")
+    return { symbol_info }
+
+@app.get("/changed_again_teste/{symbol}")
+def get_teste(symbol: str):
+    symbol_info = mt5.symbol_info(symbol)
+    if not symbol_info:
+        raise HTTPException(status_code=404, detail="Ativo não encontrado ["+mt5.last_error()+"]")
+    return { symbol_info }
+
 @app.post("/order")
 def enviar_ordem(order: OrderSchema):
     # Lógica nativa do Python-MT5 para enviar ordens

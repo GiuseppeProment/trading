@@ -4,13 +4,12 @@ FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm
 ARG BUILD_DATE
 ARG VERSION
 LABEL build_version="Metatrader Docker:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="gmartin"
+LABEL maintainer="giuseppe.proment@gmail.com"
 
 ENV TITLE=Metatrader5
 ENV WINEPREFIX="/config/.wine"
 ENV WINEDEBUG=-all
 
-#&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /etc/apt/keyrings/winehq-archive.key\
 # Install all packages in a single layer to reduce image size
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -31,9 +30,10 @@ RUN apt-get update \
     && apt-get install --install-recommends -y winehq-staging \
     && apt-get clean 
 
-COPY /Metatrader /Metatrader
-RUN chmod +x /Metatrader/start.sh
+COPY /metatrader /metatrader
+RUN chmod +x /metatrader/start.sh
 COPY /root /
 
 EXPOSE 3000 8000
 VOLUME /config
+VOLUME /metatrader
