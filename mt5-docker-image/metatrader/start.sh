@@ -9,7 +9,7 @@ metatrader_version="5.0.37"
 mt5server_port="8001"
 #MT5_CMD_OPTIONS="/config:Z:\\metatrader\config.ini"
 mono_url="https://dl.winehq.org/wine/wine-mono/10.3.0/wine-mono-10.3.0-x86.msi"
-python_url="https://www.python.org/ftp/python/3.9.13/python-3.9.13.exe"
+python_url="https://www.python.org/ftp/python/3.10.0/python-3.10.0.exe"
 mt5setup_url="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe"
 
 # Function to display a graphical message
@@ -102,14 +102,14 @@ if ! is_wine_python_package_installed "MetaTrader5==$metatrader_version"; then
     $wine_executable python -m pip install --no-cache-dir MetaTrader5==$metatrader_version
 fi
 
-show_message "[8] Installing fastapi, uvicorn and pandas library in Windows"
+show_message "[8] Installing fastapi, uvicorn library in Windows"
 if ! is_wine_python_package_installed "fastapi" or ! is_wine_python_package_installed "pandas" ; then
     $wine_executable python -m pip install --no-cache-dir fastapi uvicorn
 fi
 
 show_message "[9] Installing pandas library in Windows"
 if ! is_wine_python_package_installed "pandas" ; then
-    $wine_executable python -m pip install --no-cache-dir pandas
+    $wine_executable python -m pip install --no-cache-dir pandas --only-binary :all:
 fi
 
 show_message "[10] Checking and installing pyxdg library in Linux if necessary"

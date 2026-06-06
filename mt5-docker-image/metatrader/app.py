@@ -1,6 +1,4 @@
 import MetaTrader5 as mt5
-import pandas as pd
-import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
@@ -15,19 +13,29 @@ class OrderSchema(BaseModel):
     volume: float
     order_type: str # 'BUY' ou 'SELL'
 
-@app.get("/price/{symbol}")
-def get_price(symbol: str):
+@app.get("/symbol_info_tick/{symbol}")
+def symbol_info_tick(symbol: str):
     tick = mt5.symbol_info_tick(symbol)
     if not tick:
         raise HTTPException(status_code=404, detail="Ativo não encontrado")
-    return {"symbol": symbol, "bid": tick.bid, "ask": tick.ask}
+    return tick._asdict()
 
-@app.get("/{symbol}")
-def get(symbol: str):
+@app.get("/symbol_info/{symbol}")
+def symbol_info(symbol: str):
     symbol_info = mt5.symbol_info(symbol)
     if not symbol_info:
         raise HTTPException(status_code=404, detail="Ativo não encontrado ["+mt5.last_error()+"]")
-    return { json.dumps( pd.DataFrame( symbol_info ).to_dict( orient="records")) }
+    return symbol_info._asdict()
+
+@app.get("/symbols_get/{group}")
+def symbols_get(group: str):
+    result = mt5.symbols_get(group)
+    if not result:
+        raise HTTPException(status_code=404, detail=mt5.last_error())
+    resultAsDict = []
+    for symbol in result :
+        resultAsDict.append( symbol._asdict() )
+    return resultAsDict
 
 @app.post("/order")
 def enviar_ordem(order: OrderSchema):
