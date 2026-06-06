@@ -1,0 +1,9 @@
+app:
+  metatraderUrl: http://localhost:8000
+  maxSpreadTick: 2
+  maxSpreadPercent: 0.15
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss} [%logger{0}] %msg%n"
+
