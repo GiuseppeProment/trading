@@ -1,6 +1,6 @@
 package com.watchandorder.service;
 
-import com.watchandorder.domain.Mt5Candle;
+import com.watchandorder.domain.Candle;
 import org.ta4j.core.BarSeries;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
@@ -27,9 +27,9 @@ public class MarketDataService {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         // 2. O Jackson faz o mapeamento direto das chaves do objeto JSON para a lista de Records
-        List<Mt5Candle> candles = objectMapper.readValue(
+        List<Candle> candles = objectMapper.readValue(
                 response.body(),
-                new TypeReference<List<Mt5Candle>>() {}
+                new TypeReference<List<Candle>>() {}
         );
 
         /*

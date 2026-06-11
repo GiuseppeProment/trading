@@ -2,8 +2,15 @@ app:
   metatraderUrl: http://localhost:8000
   maxSpreadTick: 2
   maxSpreadPercent: 0.15
+  #group: "*3,*4,*5,!TF*,!TAXA*"
+  group: "NVDC34"
+  corePoolSize: 1000
+  maxPoolSize: 3000
+
 
 logging:
+  level:
+    com.watchandorder: INFO
   pattern:
     console: "%d{HH:mm:ss} [%logger{0}] %msg%n"
 

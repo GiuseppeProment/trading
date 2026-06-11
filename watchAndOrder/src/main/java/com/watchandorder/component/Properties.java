@@ -9,6 +9,10 @@ public class Properties {
     private String metatraderUrl;
     private int maxSpreadTick;
     private double maxSpreadPercent;
+    private String group;
+    private int corePoolSize;
+    private int maxPoolSize;
+
 
     public int getMaxSpreadTick() {
         return maxSpreadTick;
@@ -32,6 +36,30 @@ public class Properties {
 
     public void setMetatraderUrl(String metatraderUrl) {
         this.metatraderUrl = metatraderUrl;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public int getCorePoolSize() {
+        return corePoolSize;
+    }
+
+    public void setCorePoolSize(int corePoolSize) {
+        this.corePoolSize = corePoolSize;
+    }
+
+    public int getMaxPoolSize() {
+        return maxPoolSize;
+    }
+
+    public void setMaxPoolSize(int maxPoolSize) {
+        this.maxPoolSize = maxPoolSize;
     }
 }
 

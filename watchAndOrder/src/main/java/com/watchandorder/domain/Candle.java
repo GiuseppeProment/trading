@@ -1,19 +1,20 @@
 package com.watchandorder.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-public record Mt5Candle(
+public record Candle(
         long time,
         double open,
         double high,
         double low,
         double close,
-
-        @JsonProperty("tick_volume") // Mapeia a chave exata vinda do Pandas
-        double volume
+        double tick_volume,
+        double spread,
+        double real_volume
 ) {
     /**
      * Helper method para converter o timestamp Unix retornado pelo MT5
