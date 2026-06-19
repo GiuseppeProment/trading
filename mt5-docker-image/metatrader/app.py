@@ -1,8 +1,14 @@
 import MetaTrader5 as mt5
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import asyncio
+import sys
 
 app = FastAPI()
+
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
 
 # Inicializa o MT5 assim que a API REST sobe
 if not mt5.initialize():

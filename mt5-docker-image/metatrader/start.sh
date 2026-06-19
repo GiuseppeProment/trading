@@ -103,8 +103,13 @@ if ! is_wine_python_package_installed "MetaTrader5==$metatrader_version"; then
 fi
 
 show_message "[8] Installing fastapi, uvicorn library in Windows"
-if ! is_wine_python_package_installed "fastapi" or ! is_wine_python_package_installed "pandas" ; then
-    $wine_executable python -m pip install --no-cache-dir fastapi uvicorn
+if ! is_wine_python_package_installed "fastapi" or ! is_wine_python_package_installed "uvicorn" ; then
+    $wine_executable python -m pip install --no-cache-dir fastapi uvicorn  
+fi
+
+show_message "[9] Installing websocketsibrary in Windows"
+if ! is_wine_python_package_installed "websockets" ; then
+    $wine_executable python -m pip install --no-cache-dir websockets --only-binary :all:    
 fi
 
 show_message "[9] Installing pandas library in Windows"
@@ -119,7 +124,7 @@ fi
 
 show_message "[11] Starting the app.py server..."
 cd /metatrader
-$wine_executable python -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload &
+$wine_executable python -m uvicorn app:app --host 0.0.0.0 --port 8000 --loop asyncio &
 sleep 5
 if ss -tuln | grep ":8000" > /dev/null; then
     show_message "[10] The app.py server is running on port 8000."

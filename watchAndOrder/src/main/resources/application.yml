@@ -2,10 +2,10 @@ app:
   metatraderUrl: http://localhost:8000
   maxSpreadTick: 2
   maxSpreadPercent: 0.15
-  #group: "*3,*4,*5,!TF*,!TAXA*"
-  group: "NVDC34"
-  corePoolSize: 1000
-  maxPoolSize: 3000
+  group: "*3,*4,*5,!TF*,!TAXA*"
+  #group: "NVDC34"
+  corePoolSize: 5000
+  maxPoolSize: 10000
 
 
 logging:
