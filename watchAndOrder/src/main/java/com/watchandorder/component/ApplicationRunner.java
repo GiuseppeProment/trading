@@ -20,19 +20,21 @@ public class ApplicationRunner implements org.springframework.boot.ApplicationRu
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationRunner.class);
 
-    private final Properties configurationProperties;
-    private final SharedStateComponent sharedState;
-    private final WatcherComponent watcher;
+    private final Properties properties;
+    private final SharedState sharedState;
+    private final Watcher watcher;
     private final RestClient restClient;
+    private final Helper helper;
 
     @Autowired
-    public ApplicationRunner(Properties configurationProperties,
-                             SharedStateComponent sharedState,
-                             WatcherComponent watcher) {
-        this.configurationProperties = configurationProperties;
+    public ApplicationRunner(Properties properties,
+                             SharedState sharedState,
+                             Watcher watcher, Helper helper) {
+        this.properties = properties;
         this.sharedState = sharedState;
         this.watcher = watcher;
-        this.restClient = RestClient.create(configurationProperties.getMetatraderUrl());
+        this.helper = helper;
+        this.restClient = RestClient.create(properties.getMetatraderUrl());
     }
 
 
@@ -41,36 +43,62 @@ public class ApplicationRunner implements org.springframework.boot.ApplicationRu
 
         logger.info("ApplicationRunner started.");
         do {
-            List<Paper> response = restClient
-                    .get().uri(String.format("symbols_get/%s", configurationProperties.getGroup()))
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve().body(new ParameterizedTypeReference<>() {
-                    });
-            assert response != null;
-            logger.info("Received papers: {}", response.size());
-            removeNonRelevantStock(response);
-            response.removeAll(sharedState.watching);
-            logger.info("Papers after removing watching: {}", response.size());
+            List<Paper> papers = getPapers();
+            assert papers != null;
+            logger.info("Received papers: {}", papers.size());
+            papers.forEach(this::GetAndAddInfo);
+            removeNonRelevantStock(papers);
+            papers.removeAll(sharedState.watching);
+            logger.info("Papers after removing watching: {}", papers.size());
             sharedState.papers.clear();
-            sharedState.papers.addAll(response);
-            logger.debug(response.stream().map(Paper::name).toList().toString());
+            sharedState.papers.addAll(papers);
+            logger.debug(papers.stream().map(Paper::getName).toList().toString());
             sharedState.papers.forEach(watcher::start);
-
-            Thread.sleep(Duration.ofSeconds(2));
-
-            logger.info("Paper list sizes:\npapers={}\nwatching={}\ntrading={}\ntraded={}",
+            helper.sleep(Duration.ofSeconds(2));
+            logger.info("""
+                   ======================
+                   Paper list sizes:
+                   ======================
+                   papers={}
+                   watching={}
+                   trading={}
+                   traded={}
+                   """,
                     sharedState.papers.size(),
                     sharedState.watching.size(),
                     sharedState.trading.size(),
                     sharedState.traded.size());
-
-            logger.info("Order list sizes:\nbought={}\nlost={}\nexecuted={}",
-                    sharedState.bought.size(),
+            logger.info("""
+                    =================
+                    Order list sizes:
+                    =================
+                    bought={}
+                    lost={}
+                    executed={}
+                    """,
+                    sharedState.pending.size(),
                     sharedState.lost.size(),
                     sharedState.executed.size());
+            if (properties.isSingleRun()) {
+                logger.info("Single run mode enabled. Exiting after one iteration.");
+                break;
+            }
+            helper.sleep(Duration.ofSeconds(properties.getPapersRefreshRate()));
+        } while (true);
+    }
 
-            Thread.sleep(Duration.ofSeconds(10));
-        } while (false);
+    private List<Paper> getPapers() {
+        return restClient
+                .get().uri(String.format("symbols_get/%s", properties.getGroup()))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().body(new ParameterizedTypeReference<>() {});
+    }
+
+    private void GetAndAddInfo(Paper paper) {
+        PaperInfo paperInfo = restClient.get().uri("symbol_info/" + paper.getName())
+                .accept(MediaType.APPLICATION_JSON).retrieve().body(PaperInfo.class);
+        logger.debug(ObjectUtils.nullSafeToString(paperInfo));
+        paper.setPaperInfo(paperInfo);
     }
 
     private void removeNonRelevantStock(List<Paper> response) {
@@ -81,16 +109,13 @@ public class ApplicationRunner implements org.springframework.boot.ApplicationRu
     }
 
     private boolean isLowSpread(Paper paper) {
-        PaperInfo paperInfo = restClient.get().uri("symbol_info/" + paper.name())
-                .accept(MediaType.APPLICATION_JSON).retrieve().body(PaperInfo.class);
-        logger.debug(ObjectUtils.nullSafeToString(paperInfo));
-        if (paperInfo == null)
+        if (paper.getPaperInfo() == null)
             return false;
-        if (paperInfo.spread() <= configurationProperties.getMaxSpreadTick())
+        if (paper.getPaperInfo().spread() <= properties.getMaxSpreadTick())
             return true;
-        if (paperInfo.ask() > 0) {
-            double spreadPercent = paperInfo.spread() * 0.01 / paperInfo.ask();
-            return spreadPercent <= configurationProperties.getMaxSpreadPercent() / 100.0;
+        if (paper.getPaperInfo().ask() > 0) {
+            double spreadPercent = paper.getPaperInfo().spread() * 0.01 / paper.getPaperInfo().ask();
+            return spreadPercent <= properties.getMaxSpreadPercent() / 100.0;
         }
         return false;
     }
@@ -98,13 +123,13 @@ public class ApplicationRunner implements org.springframework.boot.ApplicationRu
     private boolean isStock(Paper paper) {
         logger.debug(paper.toString());
         return
-                paper.option_mode() == 0 && // not an option
-                        paper.trade_calc_mode() == 32 && // calc mode for stocks
-                        paper.trade_mode() == 4 && // long and short allowed
-                        paper.path().contains("BOVESPA") && // is a BOVESPA paper
-                        (paper.name().endsWith("3") || // common stock
-                                paper.name().endsWith("4") || // preferred stock
-                                paper.name().endsWith("5")) &&  // other
-                        (!paper.name().startsWith("TF") && !paper.name().startsWith("TAXA"));
+                paper.getOption_mode() == 0 && // not an option
+                        paper.getTrade_calc_mode() == 32 && // calc mode for stocks
+                        paper.getTrade_mode() == 4 && // long and short allowed
+                        paper.getPath().contains("BOVESPA") && // is a BOVESPA paper
+                        (paper.getName().endsWith("3") || // common stock
+                                paper.getName().endsWith("4") || // preferred stock
+                                paper.getName().endsWith("5")) &&  // other
+                        (!paper.getName().startsWith("TF") && !paper.getName().startsWith("TAXA"));
     }
 }

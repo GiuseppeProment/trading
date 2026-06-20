@@ -3,6 +3,8 @@ package com.watchandorder.component;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
+
 @Configuration
 @ConfigurationProperties(prefix = "app")
 public class Properties {
@@ -12,7 +14,19 @@ public class Properties {
     private String group;
     private int corePoolSize;
     private int maxPoolSize;
+    private int papersRefreshRate;
+    private boolean isSingleRun;
+    private int orderCheckInterval;
 
+    public int getInitialAccountBalance() {
+        return initialAccountBalance;
+    }
+
+    public void setInitialAccountBalance(int initialAccountBalance) {
+        this.initialAccountBalance = initialAccountBalance;
+    }
+
+    private int initialAccountBalance;
 
     public int getMaxSpreadTick() {
         return maxSpreadTick;
@@ -60,6 +74,30 @@ public class Properties {
 
     public void setMaxPoolSize(int maxPoolSize) {
         this.maxPoolSize = maxPoolSize;
+    }
+
+    public int getPapersRefreshRate() {
+        return papersRefreshRate;
+    }
+
+    public void setPapersRefreshRate(int papersRefreshRate) {
+        this.papersRefreshRate = papersRefreshRate;
+    }
+
+    public boolean isSingleRun() {
+        return isSingleRun;
+    }
+
+    public void setSingleRun(boolean singleRun) {
+        isSingleRun = singleRun;
+    }
+
+    public int getOrderCheckInterval() {
+        return orderCheckInterval;
+    }
+
+    public void setOrderCheckInterval(int orderCheckInterval) {
+        this.orderCheckInterval = orderCheckInterval;
     }
 }
 

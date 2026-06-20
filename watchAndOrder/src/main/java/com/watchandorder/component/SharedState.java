@@ -7,13 +7,14 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
-public class SharedStateComponent {
+public class SharedState {
     CopyOnWriteArrayList<Paper> papers = new CopyOnWriteArrayList<>();
     CopyOnWriteArrayList<Paper> watching = new CopyOnWriteArrayList<>();
     CopyOnWriteArrayList<Paper> trading = new CopyOnWriteArrayList<>();
     CopyOnWriteArrayList<Paper> traded = new CopyOnWriteArrayList<>();
 
-    CopyOnWriteArrayList<Order> bought = new CopyOnWriteArrayList<>();
+    CopyOnWriteArrayList<Order> pending = new CopyOnWriteArrayList<>();
     CopyOnWriteArrayList<Order> lost = new CopyOnWriteArrayList<>();
     CopyOnWriteArrayList<Order> executed = new CopyOnWriteArrayList<>();
+    CopyOnWriteArrayList<Order> canceled = new CopyOnWriteArrayList<>();
 }
