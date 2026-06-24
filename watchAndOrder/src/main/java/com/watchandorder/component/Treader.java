@@ -35,7 +35,7 @@ public class Treader {
 
     @Async("Executor")
     public void start(Paper paper, Strategy strategy) {
-        logger.info("Starting Treader for paper: {}, strategy: {}", paper.getName(), strategy.toString());
+        logger.info("Starting Treader for paper: {}, strategy: {}", paper.name(), strategy.toString());
         sharedState.watching.remove(paper);
         sharedState.trading.add(paper);
         try {

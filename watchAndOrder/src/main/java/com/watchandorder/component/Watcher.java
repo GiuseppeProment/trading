@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.time.Duration;
 import java.util.List;
@@ -39,27 +40,32 @@ public class Watcher {
 
     @Async("Executor")
     public void start(Paper paper) {
-        logger.debug("Starting Watcher for paper: {}", paper.getName());
+        logger.debug("Starting Watcher for paper: {}", paper.name());
         sharedState.papers.remove(paper);
         sharedState.watching.add(paper);
         do {
-            List<Candle> candles_M1 = restClient
-                    .get().uri(String.format("copy_rates_from_pos/%s/%s/%s/%s",
-                            paper.getName(),
-                            /*timeframe*/"M1",
-                            /*start*/0,
-                            /*count*/20))
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve().body(new ParameterizedTypeReference<>() {});
+            try {
+                List<Candle> candles_M1 = restClient
+                        .get().uri(String.format("copy_rates_from_pos/%s/%s/%s/%s",
+                                paper.name(),
+                                /*timeframe*/"M1",
+                                /*start*/0,
+                                /*count*/20))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve().body(new ParameterizedTypeReference<>() {});
 
-            logger.info("Received candles M1 for paper {}: {}", paper.getName(), candles_M1.size());
-            logger.debug("First candle: {}", candles_M1.getFirst().toString());
+                logger.debug("Received candles M1 for paper {}: {}", paper.name(), candles_M1.size());
+                logger.debug("First candle: {}", candles_M1.getFirst().toString());
 
-            strategies.forEach(strategy -> {
-                if (strategy.hasSignalEntryFor(candles_M1)) {
-                    treader.start(paper,strategy);
-                }
-            });
+                strategies.forEach(strategy -> {
+                    if (strategy.hasSignalEntryFor(candles_M1)) {
+                        treader.start(paper, strategy);
+                    }
+                });
+                sharedState.whithoutRate.remove(paper);
+            } catch (RestClientResponseException e) {
+                sharedState.whithoutRate.add(paper);
+            }
             helper.sleep(Duration.ofMinutes(1));
         } while (sharedState.watching.contains(paper));
     }

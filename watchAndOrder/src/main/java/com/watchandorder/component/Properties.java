@@ -15,8 +15,9 @@ public class Properties {
     private int corePoolSize;
     private int maxPoolSize;
     private int papersRefreshRate;
-    private boolean isSingleRun;
+    private boolean singleRun;
     private int orderCheckInterval;
+    private int initialAccountBalance;
 
     public int getInitialAccountBalance() {
         return initialAccountBalance;
@@ -25,8 +26,6 @@ public class Properties {
     public void setInitialAccountBalance(int initialAccountBalance) {
         this.initialAccountBalance = initialAccountBalance;
     }
-
-    private int initialAccountBalance;
 
     public int getMaxSpreadTick() {
         return maxSpreadTick;
@@ -84,20 +83,20 @@ public class Properties {
         this.papersRefreshRate = papersRefreshRate;
     }
 
-    public boolean isSingleRun() {
-        return isSingleRun;
-    }
-
-    public void setSingleRun(boolean singleRun) {
-        isSingleRun = singleRun;
-    }
-
     public int getOrderCheckInterval() {
         return orderCheckInterval;
     }
 
     public void setOrderCheckInterval(int orderCheckInterval) {
         this.orderCheckInterval = orderCheckInterval;
+    }
+
+    public boolean isSingleRun() {
+        return singleRun;
+    }
+
+    public void setSingleRun(boolean singleRun) {
+        this.singleRun = singleRun;
     }
 }
 

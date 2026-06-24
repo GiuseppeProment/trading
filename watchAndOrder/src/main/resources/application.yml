@@ -2,18 +2,18 @@ app:
   metatraderUrl: http://localhost:8000
   maxSpreadTick: 2
   maxSpreadPercent: 0.15
-  #group: "*3,*4,*5,!TF*,!TAXA*"
-  group: "NVDC34,MGLU3,SPCX34,AMZO34,VALE3"
+  group: "*3,*4,*5,!TF*,!TAXA*"
+  #group: "NVDC34,MGLU3,SPCX34,AMZO34,VALE3"
   corePoolSize: 5000
   maxPoolSize: 10000
   papersRefreshRate: 30
   orderCheckInterval: 1
-  isSingleRun: true
+  singleRun: false
   initialAccountBalance: 10000
 
 logging:
   level:
     com.watchandorder: INFO
   pattern:
-    console: "%d{HH:mm:ss} [%logger{0}] %msg%n"
+    console: "%d{HH:mm:ss} [%-5level] [%logger{0}] %msg%n"
 

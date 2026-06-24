@@ -9,8 +9,8 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.time.Duration;
 import java.util.List;
@@ -46,45 +46,32 @@ public class ApplicationRunner implements org.springframework.boot.ApplicationRu
             List<Paper> papers = getPapers();
             assert papers != null;
             logger.info("Received papers: {}", papers.size());
-            papers.forEach(this::GetAndAddInfo);
             removeNonRelevantStock(papers);
+            // remove from watching paper not in papers list anymore
+            sharedState.watching.removeIf(watchedPaper -> ! papers.contains(watchedPaper));
+            // remove from papers list the ones already being watched
             papers.removeAll(sharedState.watching);
-            logger.info("Papers after removing watching: {}", papers.size());
+            logger.info("Papers after removing watching: {} : {}", papers.size(), papers.stream().map(Paper::name).toList());
             sharedState.papers.clear();
             sharedState.papers.addAll(papers);
-            logger.debug(papers.stream().map(Paper::getName).toList().toString());
             sharedState.papers.forEach(watcher::start);
             helper.sleep(Duration.ofSeconds(2));
-            logger.info("""
-                   ======================
-                   Paper list sizes:
-                   ======================
-                   papers={}
-                   watching={}
-                   trading={}
-                   traded={}
-                   """,
+            logger.info("Paper list sizes: papers={}, watching={}, trading={}, traded={}",
                     sharedState.papers.size(),
                     sharedState.watching.size(),
                     sharedState.trading.size(),
                     sharedState.traded.size());
-            logger.info("""
-                    =================
-                    Order list sizes:
-                    =================
-                    bought={}
-                    lost={}
-                    executed={}
-                    """,
+            logger.info("Order list sizes: bought={}, lost={}, executed={}",
                     sharedState.pending.size(),
                     sharedState.lost.size(),
                     sharedState.executed.size());
-            if (properties.isSingleRun()) {
-                logger.info("Single run mode enabled. Exiting after one iteration.");
-                break;
-            }
             helper.sleep(Duration.ofSeconds(properties.getPapersRefreshRate()));
-        } while (true);
+            logger.warn(String.format(
+                    "[%s] papers that have been ignored from analysis due to rates not found: %s",
+                    sharedState.whithoutRate.size(),
+                    sharedState.whithoutRate.stream().map(Paper::name).toList() ));
+        } while (! properties.isSingleRun());
+
     }
 
     private List<Paper> getPapers() {
@@ -94,42 +81,48 @@ public class ApplicationRunner implements org.springframework.boot.ApplicationRu
                 .retrieve().body(new ParameterizedTypeReference<>() {});
     }
 
-    private void GetAndAddInfo(Paper paper) {
-        PaperInfo paperInfo = restClient.get().uri("symbol_info/" + paper.getName())
-                .accept(MediaType.APPLICATION_JSON).retrieve().body(PaperInfo.class);
-        logger.debug(ObjectUtils.nullSafeToString(paperInfo));
-        paper.setPaperInfo(paperInfo);
+    private PaperInfo getPaperInfo(Paper paper) {
+        try {
+            return
+                    restClient.get().uri("symbol_info/" + paper.name())
+                            .accept(MediaType.APPLICATION_JSON)
+                            .retrieve()
+                            .body(PaperInfo.class);
+        } catch (RestClientResponseException e) {
+            logger.error(String.format("Exception reading symbol_info: %s. %s", paper.name(),e.getMessage()),e);
+            return null;
+        }
     }
 
-    private void removeNonRelevantStock(List<Paper> response) {
-        response.removeIf(paper -> !isStock(paper));
-        logger.info("Filtered stock papers: {}", response.size());
-        response.removeIf(paper -> !isLowSpread(paper));
-        logger.info("Papers after removing Low spread stocks: {}", response.size());
+    private void removeNonRelevantStock(List<Paper> papers) {
+        papers.removeIf(paper -> !isStock(paper));
+        logger.info("Filtered stock papers: {} : {}", papers.size(), papers.stream().map(Paper::name).toList());
+        papers.removeIf(paper -> !isLowSpread(paper));
+        logger.info("Papers after removing Low spread stocks: {} : {}", papers.size(), papers.stream().map(Paper::name).toList());
     }
 
     private boolean isLowSpread(Paper paper) {
-        if (paper.getPaperInfo() == null)
+        PaperInfo info = getPaperInfo(paper);
+        if (info == null)
             return false;
-        if (paper.getPaperInfo().spread() <= properties.getMaxSpreadTick())
+        if (info.spread() <= properties.getMaxSpreadTick())
             return true;
-        if (paper.getPaperInfo().ask() > 0) {
-            double spreadPercent = paper.getPaperInfo().spread() * 0.01 / paper.getPaperInfo().ask();
+        if (info.ask() > 0) {
+            double spreadPercent = info.spread() * 0.01 / info.ask();
             return spreadPercent <= properties.getMaxSpreadPercent() / 100.0;
         }
-        return false;
+        return true;
     }
 
     private boolean isStock(Paper paper) {
-        logger.debug(paper.toString());
         return
-                paper.getOption_mode() == 0 && // not an option
-                        paper.getTrade_calc_mode() == 32 && // calc mode for stocks
-                        paper.getTrade_mode() == 4 && // long and short allowed
-                        paper.getPath().contains("BOVESPA") && // is a BOVESPA paper
-                        (paper.getName().endsWith("3") || // common stock
-                                paper.getName().endsWith("4") || // preferred stock
-                                paper.getName().endsWith("5")) &&  // other
-                        (!paper.getName().startsWith("TF") && !paper.getName().startsWith("TAXA"));
+                paper.option_mode() == 0 && // not an option
+                        paper.trade_calc_mode() == 32 && // calc mode for stocks
+                        paper.trade_mode() == 4 && // long and short allowed
+                        paper.path().contains("BOVESPA") && // is a BOVESPA paper
+                        (paper.name().endsWith("3") || // common stock
+                                paper.name().endsWith("4") || // preferred stock
+                                paper.name().endsWith("5")) &&  // other
+                        (!paper.name().startsWith("TF") && !paper.name().startsWith("TAXA"));
     }
 }
