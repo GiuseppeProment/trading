@@ -1,6 +1,6 @@
-package com.watchandorder.service;
+package com.trader.service;
 
-import com.watchandorder.domain.Candle;
+import com.trader.domain.Candle;
 import org.ta4j.core.BarSeries;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;

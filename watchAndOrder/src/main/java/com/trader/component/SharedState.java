@@ -1,7 +1,7 @@
-package com.watchandorder.component;
+package com.trader.component;
 
-import com.watchandorder.domain.Order;
-import com.watchandorder.domain.Paper;
+import com.trader.domain.Order;
+import com.trader.domain.Paper;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -14,7 +14,7 @@ public class SharedState {
     CopyOnWriteArraySet<Paper> trading = new CopyOnWriteArraySet<>();
     CopyOnWriteArraySet<Paper> traded = new CopyOnWriteArraySet<>();
 
-    CopyOnWriteArraySet<Paper> whithoutRate = new CopyOnWriteArraySet<>();
+    CopyOnWriteArraySet<Paper> withoutRate = new CopyOnWriteArraySet<>();
 
     CopyOnWriteArrayList<Order> pending = new CopyOnWriteArrayList<>();
     CopyOnWriteArrayList<Order> lost = new CopyOnWriteArrayList<>();

@@ -1,9 +1,7 @@
-package com.watchandorder.component;
+package com.trader.component;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-
-import java.time.Duration;
 
 @Configuration
 @ConfigurationProperties(prefix = "app")
@@ -18,6 +16,7 @@ public class Properties {
     private boolean singleRun;
     private int orderCheckInterval;
     private int initialAccountBalance;
+    private int maxPaperOnInfoLogs;
 
     public int getInitialAccountBalance() {
         return initialAccountBalance;
@@ -97,6 +96,14 @@ public class Properties {
 
     public void setSingleRun(boolean singleRun) {
         this.singleRun = singleRun;
+    }
+
+    public int getMaxPaperOnInfoLogs() {
+        return maxPaperOnInfoLogs;
+    }
+
+    public void setMaxPaperOnInfoLogs(int maxPaperOnInfoLogs) {
+        this.maxPaperOnInfoLogs = maxPaperOnInfoLogs;
     }
 }
 

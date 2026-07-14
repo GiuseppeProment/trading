@@ -1,4 +1,4 @@
-package com.watchandorder.domain;
+package com.trader.domain;
 
 import java.util.Objects;
 

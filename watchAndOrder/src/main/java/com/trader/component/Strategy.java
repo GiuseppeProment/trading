@@ -1,6 +1,6 @@
-package com.watchandorder.component;
+package com.trader.component;
 
-import com.watchandorder.domain.Candle;
+import com.trader.domain.Candle;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
-package com.watchandorder.component;
+package com.trader.component;
 
-import com.watchandorder.domain.Paper;
-import com.watchandorder.domain.PaperInfo;
+import com.trader.domain.Paper;
+import com.trader.domain.PaperInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +16,9 @@ import java.time.Duration;
 import java.util.List;
 
 @Component
-public class ApplicationRunner implements org.springframework.boot.ApplicationRunner {
+public class TraderApplicationRunner implements org.springframework.boot.ApplicationRunner {
 
-    private static final Logger logger = LoggerFactory.getLogger(ApplicationRunner.class);
+    private static final Logger logger = LoggerFactory.getLogger(TraderApplicationRunner.class);
 
     private final Properties properties;
     private final SharedState sharedState;
@@ -27,9 +27,9 @@ public class ApplicationRunner implements org.springframework.boot.ApplicationRu
     private final Helper helper;
 
     @Autowired
-    public ApplicationRunner(Properties properties,
-                             SharedState sharedState,
-                             Watcher watcher, Helper helper) {
+    public TraderApplicationRunner(Properties properties,
+                                   SharedState sharedState,
+                                   Watcher watcher, Helper helper) {
         this.properties = properties;
         this.sharedState = sharedState;
         this.watcher = watcher;
@@ -51,7 +51,8 @@ public class ApplicationRunner implements org.springframework.boot.ApplicationRu
             sharedState.watching.removeIf(watchedPaper -> ! papers.contains(watchedPaper));
             // remove from papers list the ones already being watched
             papers.removeAll(sharedState.watching);
-            logger.info("Papers after removing watching: {} : {}", papers.size(), papers.stream().map(Paper::name).toList());
+            logger.info("Papers after removing watching: {} {}...", papers.size(),
+                    papers.stream().limit(properties.getMaxPaperOnInfoLogs()).map(Paper::name).toList());
             sharedState.papers.clear();
             sharedState.papers.addAll(papers);
             sharedState.papers.forEach(watcher::start);
@@ -65,11 +66,11 @@ public class ApplicationRunner implements org.springframework.boot.ApplicationRu
                     sharedState.pending.size(),
                     sharedState.lost.size(),
                     sharedState.executed.size());
-            helper.sleep(Duration.ofSeconds(properties.getPapersRefreshRate()));
+            helper.sleep(Duration.ofMinutes(properties.getPapersRefreshRate()));
             logger.warn(String.format(
-                    "[%s] papers that have been ignored from analysis due to rates not found: %s",
-                    sharedState.whithoutRate.size(),
-                    sharedState.whithoutRate.stream().map(Paper::name).toList() ));
+                    "[%s] papers that have been ignored from analysis due to rates not found:[%s]",
+                    sharedState.withoutRate.size(),
+                    sharedState.withoutRate.stream().limit(properties.getMaxPaperOnInfoLogs()).map(Paper::name).toList() ));
         } while (! properties.isSingleRun());
 
     }
@@ -96,9 +97,9 @@ public class ApplicationRunner implements org.springframework.boot.ApplicationRu
 
     private void removeNonRelevantStock(List<Paper> papers) {
         papers.removeIf(paper -> !isStock(paper));
-        logger.info("Filtered stock papers: {} : {}", papers.size(), papers.stream().map(Paper::name).toList());
+        logger.info("Filtered stock papers: {} {}...", papers.size(), papers.stream().limit(properties.getMaxPaperOnInfoLogs()).map(Paper::name).toList());
         papers.removeIf(paper -> !isLowSpread(paper));
-        logger.info("Papers after removing Low spread stocks: {} : {}", papers.size(), papers.stream().map(Paper::name).toList());
+        logger.info("Papers after removing Low spread stocks: {} {}...", papers.size(), papers.stream().limit(properties.getMaxPaperOnInfoLogs()).map(Paper::name).toList());
     }
 
     private boolean isLowSpread(Paper paper) {

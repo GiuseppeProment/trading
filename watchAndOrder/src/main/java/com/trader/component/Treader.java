@@ -1,7 +1,7 @@
-package com.watchandorder.component;
+package com.trader.component;
 
-import com.watchandorder.domain.Order;
-import com.watchandorder.domain.Paper;
+import com.trader.domain.Order;
+import com.trader.domain.Paper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;

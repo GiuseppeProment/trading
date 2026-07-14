@@ -1,4 +1,4 @@
-package com.watchandorder.component;
+package com.trader.component;
 
 import org.springframework.stereotype.Component;
 

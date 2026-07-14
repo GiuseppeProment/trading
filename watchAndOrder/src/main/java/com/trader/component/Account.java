@@ -1,6 +1,6 @@
-package com.watchandorder.component;
+package com.trader.component;
 
-import com.watchandorder.domain.Order;
+import com.trader.domain.Order;
 import org.springframework.stereotype.Component;
 
 @Component

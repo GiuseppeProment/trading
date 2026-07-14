@@ -1,4 +1,4 @@
-package com.watchandorder.domain;
+package com.trader.domain;
 
 public record PaperInfo(int spread, int ask, int bid) {
     @Override

@@ -1,15 +1,16 @@
 app:
   metatraderUrl: http://localhost:8000
-  maxSpreadTick: 2
-  maxSpreadPercent: 0.15
   group: "*3,*4,*5,!TF*,!TAXA*"
   #group: "NVDC34,MGLU3,SPCX34,AMZO34,VALE3"
   corePoolSize: 5000
   maxPoolSize: 10000
-  papersRefreshRate: 30
+  maxSpreadTick: 2
+  maxSpreadPercent: 0.15
+  papersRefreshRate: 3
   orderCheckInterval: 1
   singleRun: false
   initialAccountBalance: 10000
+  maxPaperOnInfoLogs: 5
 
 logging:
   level:

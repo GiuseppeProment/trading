@@ -1,7 +1,7 @@
-package com.watchandorder.component;
+package com.trader.component;
 
-import com.watchandorder.domain.Candle;
-import com.watchandorder.domain.Paper;
+import com.trader.domain.Candle;
+import com.trader.domain.Paper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -62,9 +62,9 @@ public class Watcher {
                         treader.start(paper, strategy);
                     }
                 });
-                sharedState.whithoutRate.remove(paper);
+                sharedState.withoutRate.remove(paper);
             } catch (RestClientResponseException e) {
-                sharedState.whithoutRate.add(paper);
+                sharedState.withoutRate.add(paper);
             }
             helper.sleep(Duration.ofMinutes(1));
         } while (sharedState.watching.contains(paper));

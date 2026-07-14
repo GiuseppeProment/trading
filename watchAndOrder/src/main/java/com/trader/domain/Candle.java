@@ -1,6 +1,4 @@
-package com.watchandorder.domain;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package com.trader.domain;
 
 import java.time.Instant;
 import java.time.ZoneId;
